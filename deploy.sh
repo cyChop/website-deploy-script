@@ -82,19 +82,13 @@ remove_versioning() {
 
 minify_file() {
 	echo "Minify file $1"
-	remove_leading_traling_spaces "$1"
-	#TODO sed -i 's#[ \t]+# #g' "$1" # multiple spaces # TODO not when in string
-	sed -i s#//.*##g "$1" # remove //-style comments # TODO not when in string
-	remove_newlines "$1"
-	#TODO sed -i s#/\*.*\*/##g "$1" # multiline JS/CSS comments # TODO not when in string
-	#TODO sed -i s#<!-- .*-->##g "$1" # multiline HTML comments # TODO not when in string
+	perl -pi -e 's#^[ \t]*##g; s/[ \t]*$//g;' "$1" # leading & trailing spaces
+	perl -pi -e 's#//.*##g' "$1" # remove //-style comments # TODO not when in string
+	perl -pi -e 's#\r?\n# #g' "$1" # new lines
+	perl -pi -e 's#/\*.*?\*/##g' "$1" # multiline JS/CSS comments # TODO not when in string
+	perl -pi -e 's#<!-- .*?-->##g' "$1" # multiline HTML comments # TODO not when in string
+	perl -pi -e 's#[ \t]\+# #g' "$1" # multiple spaces # TODO not when in string
 	# avoid matching when in string: https://stackoverflow.com/questions/6462578/alternative-to-regex-match-all-instances-not-inside-quotes
-}
-remove_leading_traling_spaces() {
-	sed -i 's/^[ \t]*//g; s/[ \t]*$//g;' "$1"
-}
-remove_newlines() {
-	sed -i ':a;N;$!ba;s/\n/ /g' "$1"
 }
 
 ## Now to work
