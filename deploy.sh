@@ -13,7 +13,88 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# This script says hello
+# This script minifies HTML, CSS and JS in a copy version of the original directory
+# and makes sure RCS information (typically .git repository is not copied along)
 
-echo "Hello World!"
+
+## Constant: subdirectory if no target is supplied
+DEFAULT_TARGET_SUBDIR="_deploy"
+## Constant: regex to find files to minify
+MINIFIABLE_FILES_REGEX=".*\.\(html?\|php\|css\|js\)"
+
+
+## Functions
+check_source() {
+	if [ -z source ]; then
+		echo "Source could not be determined"
+		exit 1; # fail
+	elif [ ! -e $source ]; then
+		echof "Source $source does not exist"
+		exit 1; # fail
+	fi
+}
+
+read_target() {
+	if [ -z $target ]; then
+		if [ -d $source ]; then
+			target=$source
+		else
+			target="`dirname \"$source\"`"
+		fi
+		target="${target%/}$DEFAULT_TARGET_SUBDIR"
+	fi
+}
+check_target() {
+	abort=false
+	if [ -e $target ]; then
+		confirm_erase_target
+        fi
+	if $abort; then
+		echo "Aborting";
+		exit 0; # no error
+	fi;
+}
+confirm_erase_target() {
+	read -p "Target $target already exists and will be erased. Do you confirm? [Y/n] " confirm
+	case ${confirm:-y} in
+		[nN] )	abort=true
+			;;
+		[yY] )	;;
+		* )	echo "Incorrect input."
+			confirm_erase_target
+	esac
+}
+
+copy_to_target() {
+	if [ -e $target ]; then
+		echo "Removing $target ..."
+		rm -rf $target
+	fi
+	cp -pr $source $target
+}
+
+## Now to work
+source=${1:-"`dirname \"$0\"`"}
+target=$2
+
+echo "### Source is: $source"
+check_source
+read_target
+echo "### Target is: $target"
+check_target
+
+echo -e "\n### Executing"
+## copy
+copy_to_target
+## clean target
+if [ -d $target ]; then
+        # TODO remove all versioning information
+	# TODO find and minify all
+	echo "Must still implement 1"
+else
+	# TODO minify $target
+	echo "Must still implement 2"
+fi
+
+echo -e "\n### Done!"
 
