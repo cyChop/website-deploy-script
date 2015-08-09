@@ -20,7 +20,7 @@
 ## Constant: subdirectory if no target is supplied
 DEFAULT_TARGET_SUBDIR="_deploy"
 ## Constant: regex to find files to minify
-MINIFIABLE_FILES_REGEX=".*\.\(html?\|php\|css\|js\)"
+MINIFIABLE_FILE_REGEX=.*\.\(html?\|php\|css\|js\)$
 
 
 ## Functions
@@ -37,11 +37,10 @@ check_source() {
 read_target() {
 	if [ -z $target ]; then
 		if [ -d $source ]; then
-			target=$source
+			target="${source%/}$DEFAULT_TARGET_SUBDIR"
 		else
-			target="`dirname \"$source\"`"
+			target="`dirname \"$source\"`$DEFAULT_TARGET_SUBDIR/`basename \"$source\"`"
 		fi
-		target="${target%/}$DEFAULT_TARGET_SUBDIR"
 	fi
 }
 check_target() {
@@ -73,6 +72,15 @@ copy_to_target() {
 	cp -pr $source $target
 }
 
+remove_versioning() {
+	# TODO remove versioning info
+	echo "TODO remove versioning info $target"
+}
+minify_file() {
+	# TODO minify file
+	echo "TODO minify file $1"
+}
+
 ## Now to work
 source=${1:-"`dirname \"$0\"`"}
 target=$2
@@ -88,12 +96,10 @@ echo -e "\n### Executing"
 copy_to_target
 ## clean target
 if [ -d $target ]; then
-        # TODO remove all versioning information
-	# TODO find and minify all
-	echo "Must still implement 1"
-else
-	# TODO minify $target
-	echo "Must still implement 2"
+	remove_versioning
+	find $target -regex "$MINIFIABLE_FILE_REGEX" -exec minify_file {} \;
+elif [[ $target =~ $MINIFIABLE_FILE_REGEX ]]; then
+	minify_file $target
 fi
 
 echo -e "\n### Done!"
