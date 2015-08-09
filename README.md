@@ -1,6 +1,6 @@
 # Website deployment script
 
-[![Licensed under GPL v3](https://www.gnu.org/graphics/gplv3-88x31.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![License][1]][2]
 
 ## What it does
 
@@ -15,3 +15,5 @@ They are many. This is essentially a utility for basic mostly static websites. S
 * JavaScript website: many Grunt or Gulp plugin perform a much better minification according to your requirements and your RCS repository should not be included in your final version.
 * Java JAR: some Maven plugins allow for minification too and, unless badly configured, no RCS information should be included in your binary.
 
+[1]: https://img.shields.io/badge/license-MIT-blue.svg
+[2]: http://opensource.org/licenses/MIT
