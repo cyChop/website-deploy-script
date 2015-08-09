@@ -14,8 +14,12 @@ RCS_FIND_REGEX=".*/\.\(git\|svn\)[^/]*"
 
 ## Functions
 convert_to_full_path() {
-	local abs_path="`cd \"$1\"; pwd`"
-	echo "$abs_path"
+	if [ -d $1 ]; then
+		local abs_path="`cd \"$1\"; pwd`"
+		echo "$abs_path"
+	else
+		echo "$1"
+	fi
 }
 
 read_source() {
@@ -75,9 +79,22 @@ remove_versioning() {
 	echo "Removing any GIT or SVN information"
 	find $1 -regex $RCS_FIND_REGEX -exec echo "Remove {}" \; -prune -exec rm -rf {} \;
 }
+
 minify_file() {
-	# TODO minify file
-	echo "TODO minify file $1"
+	echo "Minify file $1"
+	remove_leading_traling_spaces "$1"
+	#TODO sed -i 's#[ \t]+# #g' "$1" # multiple spaces # TODO not when in string
+	sed -i s#//.*##g "$1" # remove //-style comments # TODO not when in string
+	remove_newlines "$1"
+	#TODO sed -i s#/\*.*\*/##g "$1" # multiline JS/CSS comments # TODO not when in string
+	#TODO sed -i s#<!-- .*-->##g "$1" # multiline HTML comments # TODO not when in string
+	# avoid matching when in string: https://stackoverflow.com/questions/6462578/alternative-to-regex-match-all-instances-not-inside-quotes
+}
+remove_leading_traling_spaces() {
+	sed -i 's/^[ \t]*//g; s/[ \t]*$//g;' "$1"
+}
+remove_newlines() {
+	sed -i ':a;N;$!ba;s/\n/ /g' "$1"
 }
 
 ## Now to work
@@ -105,4 +122,3 @@ elif [[ $target =~ $MINIFIABLE_FILE_REGEX ]]; then
 fi
 
 echo -e "\n### Done!"
-
