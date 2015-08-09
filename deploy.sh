@@ -21,9 +21,19 @@
 DEFAULT_TARGET_SUBDIR="_deploy"
 ## Constant: regex to find files to minify
 MINIFIABLE_FILE_REGEX=.*\.\(html?\|php\|css\|js\)$
+MINIFIABLE_FIND_REGEX=".*\.\(html?\|php\|css\|js\)$"
+RCS_FIND_REGEX=".*/\.\(git\|svn\)[^/]*"
 
 
 ## Functions
+convert_to_full_path() {
+	local abs_path="`cd \"$1\"; pwd`"
+	echo "$abs_path"
+}
+
+read_source() {
+	source=$(convert_to_full_path $source)
+}
 check_source() {
 	if [ -z source ]; then
 		echo "Source could not be determined"
@@ -42,6 +52,7 @@ read_target() {
 			target="`dirname \"$source\"`$DEFAULT_TARGET_SUBDIR/`basename \"$source\"`"
 		fi
 	fi
+	target=$(convert_to_full_path $target)
 }
 check_target() {
 	abort=false
@@ -66,15 +77,16 @@ confirm_erase_target() {
 
 copy_to_target() {
 	if [ -e $target ]; then
-		echo "Removing $target ..."
+		echo "# Removing $target ..."
 		rm -rf $target
 	fi
+	echo "# Copy original version to target"
 	cp -pr $source $target
 }
 
 remove_versioning() {
-	# TODO remove versioning info
-	echo "TODO remove versioning info $target"
+	echo "Removing any GIT or SVN information"
+	find $1 -regex $RCS_FIND_REGEX -exec echo "Remove {}" \; -prune -exec rm -rf {} \;
 }
 minify_file() {
 	# TODO minify file
@@ -85,6 +97,7 @@ minify_file() {
 source=${1:-"`dirname \"$0\"`"}
 target=$2
 
+read_source
 echo "### Source is: $source"
 check_source
 read_target
@@ -96,9 +109,11 @@ echo -e "\n### Executing"
 copy_to_target
 ## clean target
 if [ -d $target ]; then
-	remove_versioning
-	find $target -regex "$MINIFIABLE_FILE_REGEX" -exec minify_file {} \;
+	remove_versioning $target
+	echo "# Minifying all files where minification is applicable"
+	find $target -regex $MINIFIABLE_FIND_REGEX | while read file; do minify_file "$file"; done
 elif [[ $target =~ $MINIFIABLE_FILE_REGEX ]]; then
+	echo "# Minifying target file"
 	minify_file $target
 fi
 
