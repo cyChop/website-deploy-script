@@ -86,7 +86,7 @@ minify_file() {
 	substitute_escape_strings  "//.*" "" "$1" # remove //-style comments
 	perl -pi -e 's#(?:\r?\n)+# #g' "$1" # new lines
 	substitute_escape_strings "<!-- .*?-->|/\*.*?\*/" "" "$1" # remove multiline comments
-	substitute_escape_strings "[\s]+" " " "$1" # amke multiple spaces single
+	substitute_escape_strings "[\s]+" " " "$1" # make multiple spaces single
 }
 substitute_escape_strings() {
 	perl -pi -e "s#(?:'[^']+'|\"[^\"]+\")(*SKIP)(?!)|$1#$2#g" "$3"
