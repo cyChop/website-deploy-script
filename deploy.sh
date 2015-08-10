@@ -84,10 +84,9 @@ minify_file() {
 	echo "Minify file $1"
 	perl -pi -e 's#^[ \t]*##g; s/[ \t]*$//g;' "$1" # leading & trailing spaces
 	perl -pi -e 's#//.*##g' "$1" # remove //-style comments # TODO not when in string
-	perl -pi -e 's#\r?\n# #g' "$1" # new lines
-	perl -pi -e 's#/\*.*?\*/##g' "$1" # multiline JS/CSS comments # TODO not when in string
-	perl -pi -e 's#<!-- .*?-->##g' "$1" # multiline HTML comments # TODO not when in string
-	perl -pi -e 's#[ \t]\+# #g' "$1" # multiple spaces # TODO not when in string
+	perl -pi -e 's#(?:\r?\n)+# #g' "$1" # new lines
+	perl -pi -e 's#(?!"[^"]+"|'[^']+')|<!-- .*?-->|/\*.*\*/##g' "$1" # multiline HTML comments # TODO not when in string
+	#perl -pi -e 's#[ \t]\+# #g' "$1" # multiple spaces # TODO not when in string
 	# avoid matching when in string: https://stackoverflow.com/questions/6462578/alternative-to-regex-match-all-instances-not-inside-quotes
 }
 
